@@ -1,0 +1,80 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+.app {
+  background-color: rgb(36, 36, 36);
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.board-wrapper {
+  display: grid;
+  grid-template-columns: 95% 5%;
+  grid-template-rows: 95% 5%;
+  margin-top: calc((100vh - min(90vw, 90vh - 130px) - 110px)/2);
+  width: calc(min(90vw, 90vh - 130px));
+  height: calc(min(90vw, 90vh - 130px));
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 100%;
+  height: 100%;
+}
+
+.letters, .numbers {
+  font-size: calc( (100vw - 480px)/(1280 - 480) * (24 - 16) + 16px);
+  color: white;
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.numbers {
+  flex-direction: column-reverse;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.cell img {
+  width: 80%;
+  height: 80%;
+}
+
+.black {
+  background-color: rgb(181,136,99);
+}
+
+.white {
+  background-color: rgb(240,217,181);
+}
+
+.selected {
+  background-color: rgb(114, 153, 72);
+}
+
+.available {
+  width: 2vh;
+  height: 2vh;
+  border-radius: 50%;
+  background-color: rgb(45, 111, 155);
+  position: absolute;
+  z-index: 1;
+}
