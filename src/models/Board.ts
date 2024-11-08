@@ -9,11 +9,6 @@ import { Rook } from "./figures/Rook";
 
 export class Board {
   cells: Cell[][] = [];
-  winner: string | null;
-
-  constructor()  {
-    this.winner = null;
-  }
 
   public initCells() {
     for (let i = 0; i < 8; i++) {
@@ -64,7 +59,6 @@ export class Board {
   public getCopyBoard() : Board {
     const newBoard = new Board();
     newBoard.cells = this.cells;
-    newBoard.winner = this.winner;
     return newBoard;
   }
 

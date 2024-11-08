@@ -45,8 +45,7 @@ const BoardComponent: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPl
   }
 
   function updateBoard() {
-    const newBoard = board.getCopyBoard();
-    newBoard.winner = board.winner; 
+    const newBoard = board.getCopyBoard(); 
     setBoard(newBoard);
   }
 

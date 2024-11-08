@@ -89,23 +89,9 @@ export class Cell {
   moveFigure(target: Cell) {
     // Проверяем возможность хода
     if (this.figure?.canMove(target)) {
-      // Проверяем, является ли целевая фигура королем
-      if (target.figure?.name === FigureNames.KING) {
-        // Устанавливаем победителя, если король съеден
-        const winnerColor = this.figure.color === Colors.BLACK ? "Черные" : "Белые";
-        this.board.winner = winnerColor;
-        console.log(this.board.winner + " побеждают");
-      }
-      
       this.figure.moveFigure(target);
       target.setFigure(this.figure);
       this.figure = null;
-      
-      // Обновляем доску и сохраняем победителя
-      const currentWinner = this.board.winner; // сохраняем победителя
-      const newBoard = this.board.getCopyBoard();
-      newBoard.winner = currentWinner; // восстанавливаем победителя в копии
-      this.board = newBoard; // обновляем доску
     }
   }
   

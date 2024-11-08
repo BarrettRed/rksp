@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component } from 'react';
 import './App.css';
 import BoardComponent from './components/BoardComponent';
 import { Board } from './models/Board';
@@ -24,129 +24,122 @@ const initializeAssistant = (getState: any) => {
   }
 };
 
+interface AppState {
+  board: Board;
+  whitePlayer: Player;
+  blackPlayer: Player;
+  currentPlayer: Player | null;
+}
 
-const App = () => {
-  const [board, setBoard] = useState(new Board());
-  const [blackPlayer, setBlackPlayer] = useState(new Player(Colors.BLACK));
-  const [whitePlayer, setWhitePlayer] = useState(new Player(Colors.WHITE));
-  const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
-  const [assistant, setAssistant] = useState<any>(null);
+class App extends Component<{}, AppState> {
+  assistant: any;
 
-  function restart() {
-    const newBoard = new Board();
-    newBoard.initCells();
-    newBoard.addFigures();
-    setBoard(newBoard);
-    setCurrentPlayer(whitePlayer);
-  }
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      board: new Board(),
+      whitePlayer: new Player(Colors.WHITE),
+      blackPlayer: new Player(Colors.BLACK),
+      currentPlayer: null,
+    };
 
-  function swapPlayer() {
-    // Проверяем наличие вражеского короля на доске
-    const enemyKing = board.cells.flat().some(cell => 
-      cell.figure?.name === FigureNames.KING && cell.figure.color !== currentPlayer?.color
-    );
-  
-    if (!enemyKing) {
-      // Если вражеского короля нет, текущий игрок побеждает
-      const winnerColor = currentPlayer?.color === Colors.WHITE ? "Белые" : "Черные";
-      console.log(`${winnerColor} побеждают!`);
-      //alert(`${winnerColor} побеждают!`);
-  
-      const data = {
-        action: {
-          action_id: "game_over",
-          parameters: {value: `${winnerColor} побеждают!`}
-        },
-      };
-      const unsubscribe = assistant.sendData(data, (data: any) => {
-        // функция, вызываемая, если на sendData() был отправлен ответ
-        const {type, payload} = data;
-        console.log("sendData onData:", type, payload);
-        unsubscribe();
-      });
-    } else {
-      // Если король остался, продолжаем игру
-      setCurrentPlayer(currentPlayer?.color === Colors.WHITE ? blackPlayer : whitePlayer);
-    }
-  }
-  
+    this.assistant = initializeAssistant(() => this.getStateForAssistant());
 
-  useEffect(() => {
-    restart();
-    setCurrentPlayer(whitePlayer);
-
-    const assistantInstance = initializeAssistant(() => getStateForAssistant());
-    setAssistant(assistantInstance);
-
-    assistantInstance.on('data', (event: any) => {
-      console.log(`assistant.on(data)`, event);
+    this.assistant.on('data', (event: any) => {
+      console.log('assistant.on(data)', event);
       const { action } = event;
       if (action) {
-        dispatchAssistantAction(action);
+        this.dispatchAssistantAction(action);
       }
     });
 
-    assistantInstance.on('start', () => {
-      let initialData = assistantInstance.getInitialData();
+    this.assistant.on('start', () => {
+      let initialData = this.assistant.getInitialData();
       console.log('assistant.on(start)', initialData);
     });
 
-    assistantInstance.on('command', (event: any) => {
+    this.assistant.on('command', (event: any) => {
       console.log('assistant.on(command)', event);
     });
 
-    assistantInstance.on('error', (event: any) => {
+    this.assistant.on('error', (event: any) => {
       console.log('assistant.on(error)', event);
     });
 
-    assistantInstance.on('tts', (event: any) => {
+    this.assistant.on('tts', (event: any) => {
       console.log('assistant.on(tts)', event);
     });
-  }, []);
+  }
 
-  const getStateForAssistant = () => {
-    console.log('getStateForAssistant: currentPlayer:', currentPlayer);
+  componentDidMount() {
+    this.restart();
+    this.setState({ currentPlayer: this.state.whitePlayer });
+  }
+
+  getStateForAssistant() {
     const state = {
-      current_player: currentPlayer ? currentPlayer.color : null,
+      board: {
+        currentPlayer: this.state.currentPlayer?.color,
+      },
     };
-    console.log('getStateForAssistant: state:', state);
     return state;
-  };
+  }
 
-  const dispatchAssistantAction = (action: any) => {
+  dispatchAssistantAction = (action: any) => {
     console.log('dispatchAssistantAction', action);
     if (action) {
       switch (action.type) {
         case 'restart':
-          restart();
+          this.restart();
           break;
         case 'move':
-          const moves = getCorrectCoord(action.params);
-          move(moves);
+          const moves = this.getCorrectCoord(action.params);
+          this.move(moves);
           console.log(moves);
-          break; 
+          break;
         default:
           throw new Error(`Unknown action type: ${action.type}`);
       }
     }
   };
 
-
-
-  function getCorrectCoord(str: string) {
+  getCorrectCoord(str: string) {
     str = str.toLocaleLowerCase();
-    str = str.replaceAll(",", "").replaceAll(".", "").replaceAll(" ", "").replaceAll("-", "");
-    str = str.replaceAll("эй", "A");
-    str = str.replaceAll("би", "B");
-    str = str.replaceAll("и", "E");
-    str = str.replaceAll("ф", "F");
-    str = str.replaceAll("д", "D");
-    str = str.replaceAll("die", "D");
+    str = str.replaceAll("один", "1")
+             .replaceAll("два", "2")
+             .replaceAll("три", "3")
+             .replaceAll("четыре", "4")
+             .replaceAll("пять", "5")
+             .replaceAll("шесть", "6")
+             .replaceAll("восемь", "8")
+             .replaceAll("семь", "7");
+    str = str.replaceAll(",", "")
+             .replaceAll(".", "")
+             .replaceAll(" ", "")
+             .replaceAll("-", "");
+    str = str.replaceAll("эйч", "H")
+             .replaceAll("эф", "F")
+             .replaceAll("эй", "A")
+             .replaceAll("би", "B")
+             .replaceAll("se", "C")
+             .replaceAll("си", "C")
+             .replaceAll("эф", "F")
+             .replaceAll("ф", "F")
+             .replaceAll("джи", "G")
+             .replaceAll("j", "G")
+             .replaceAll("ди", "D")
+             .replaceAll("д", "D")
+             .replaceAll("die", "D")
+             .replaceAll("de", "D")
+             .replaceAll("и", "E")
+             .replaceAll("а", "A");
+
     str = str.toLocaleUpperCase();
     return str;
   }
 
-  function move(moves: string) {
+  move(moves: string) {
+    const { board, currentPlayer } = this.state;
     const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     const from_y = letters.indexOf(moves.charAt(0));
     const from_x = Math.abs(8 - parseInt(moves.charAt(1)));
@@ -154,29 +147,123 @@ const App = () => {
     const to_x = Math.abs(8 - parseInt(moves.charAt(3)));
     console.log(from_x, from_y, to_x, to_y);
 
-    if (from_x === -1 || from_y === -1 || to_x === -1 || to_y === -1) 
+    if (from_x === -1 || from_y === -1 || to_x === -1 || to_y === -1) {
+      const data = {
+        action: {
+          action_id: "noMatch",
+          parameters: { value: `` },
+        },
+      };
+      // const unsubscribe = this.assistant.sendData(data, (data: any) => {
+      //   const { type, payload } = data;
+      //   console.log("sendData onData:", type, payload);
+      //   unsubscribe();
+      // });
       return;
-
+    }
+    // alert(this.state.board);
     const fromCell = board.getCell(from_y, from_x);
     const toCell = board.getCell(to_y, to_x);
-    // console.log(fromCell, toCell);
-    if (fromCell.figure?.color === currentPlayer?.color && fromCell.figure?.canMove(toCell)) {
+    const color = currentPlayer?.color === Colors.WHITE ? "белые" : "черные";
+    if (!fromCell.figure) {
+      const data = {
+        action: {
+          action_id: "no_figure",
+          parameters: { value: `на такой клетке нет фигуры` },
+        },
+      };
+      const unsubscribe = this.assistant.sendData(data, (data: any) => {
+        const { type, payload } = data;
+        console.log("sendData onData:", type, payload);
+        unsubscribe();
+      });
+    }
+    else if (fromCell.figure?.color !== currentPlayer?.color) {
+      const data = {
+        action: {
+          action_id: "wrong_figure",
+          parameters: { value: `сейчас ходят ${color}!` },
+        },
+      };
+      const unsubscribe = this.assistant.sendData(data, (data: any) => {
+        const { type, payload } = data;
+        console.log("sendData onData:", type, payload);
+        unsubscribe();
+      });
+    }
+    else if (!fromCell.figure?.canMove(toCell)) {
+      const data = {
+        action: {
+          action_id: "wrong_move",
+          parameters: { value: `так ходить нельзя` },
+        },
+      };
+      const unsubscribe = this.assistant.sendData(data, (data: any) => {
+        const { type, payload } = data;
+        console.log("sendData onData:", type, payload);
+        unsubscribe();
+      });
+    }
+    else if (fromCell.figure?.color === currentPlayer?.color && fromCell.figure?.canMove(toCell)) {
       fromCell.moveFigure(toCell);
-      swapPlayer();
-      setBoard(board.getCopyBoard());
+      this.swapPlayer();
+      this.setState({ board: board.getCopyBoard() });
     }
   }
 
-  return (
-    <div className="app">
-      <BoardComponent 
-        board={board}
-        setBoard={setBoard}  
-        currentPlayer={currentPlayer}
-        swapPlayer={swapPlayer}
-      />
-    </div>
-  );
-};
+  swapPlayer = () => {
+    const { board, currentPlayer, whitePlayer, blackPlayer } = this.state;
+
+    const enemyKing = board.cells.flat().some(cell => 
+      cell.figure?.name === FigureNames.KING && cell.figure.color !== currentPlayer?.color
+    );
+
+    if (!enemyKing) {
+      const winnerColor = currentPlayer?.color === Colors.WHITE ? "Белые" : "Черные";
+      console.log(`${winnerColor} побеждают!`);
+
+      const data = {
+        action: {
+          action_id: "game_over",
+          parameters: { value: `${winnerColor} побеждают!` },
+        },
+      };
+      const unsubscribe = this.assistant.sendData(data, (data: any) => {
+        const { type, payload } = data;
+        console.log("sendData onData:", type, payload);
+        unsubscribe();
+      });
+      this.restart();
+    }
+    this.setState({
+      currentPlayer: currentPlayer?.color === Colors.WHITE ? blackPlayer : whitePlayer,
+    });
+  };
+
+  restart() {
+    const newBoard = new Board();
+    newBoard.initCells();
+    newBoard.addFigures();
+    this.setState({ board: newBoard });
+    this.setState({
+      currentPlayer: this.state.whitePlayer,
+    });
+  }
+
+  render() {
+    const { board, currentPlayer } = this.state;
+
+    return (
+      <div className="app">
+        <BoardComponent
+          board={board}
+          setBoard={(newBoard: Board) => this.setState({ board: newBoard })}
+          currentPlayer={currentPlayer}
+          swapPlayer={this.swapPlayer}
+        />
+      </div>
+    );
+  }
+}
 
 export default App;

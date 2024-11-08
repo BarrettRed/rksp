@@ -4,7 +4,7 @@ entryPoint:
   - entryPoint.sc
 
 botEngine: v2
-language: ru
+language: en
 
 sts:
   noMatchThreshold: 0.2
