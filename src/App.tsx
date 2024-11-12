@@ -132,14 +132,32 @@ class App extends Component<{}, AppState> {
              .replaceAll("die", "D")
              .replaceAll("de", "D")
              .replaceAll("и", "E")
-             .replaceAll("а", "A");
+             .replaceAll("а", "A")
+             .replaceAll("е", "E");
 
     str = str.toLocaleUpperCase();
+    console.log(str); 
     return str;
   }
 
   move(moves: string) {
     const { board, currentPlayer } = this.state;
+    const pattern = /[A-H][1-8][A-H][1-8]/
+
+    if (!(pattern.test(moves) && moves.length === 4)) {
+      const data = {
+        action: {
+          action_id: "noMatch",
+          parameters: { value: `` },
+        },
+      };
+      const unsubscribe = this.assistant.sendData(data, (data: any) => {
+        const { type, payload } = data;
+        console.log("sendData onData:", type, payload);
+        unsubscribe();
+      });
+      return;
+    }
     const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     const from_y = letters.indexOf(moves.charAt(0));
     const from_x = Math.abs(8 - parseInt(moves.charAt(1)));
@@ -147,21 +165,6 @@ class App extends Component<{}, AppState> {
     const to_x = Math.abs(8 - parseInt(moves.charAt(3)));
     console.log(from_x, from_y, to_x, to_y);
 
-    if (from_x === -1 || from_y === -1 || to_x === -1 || to_y === -1) {
-      const data = {
-        action: {
-          action_id: "noMatch",
-          parameters: { value: `` },
-        },
-      };
-      // const unsubscribe = this.assistant.sendData(data, (data: any) => {
-      //   const { type, payload } = data;
-      //   console.log("sendData onData:", type, payload);
-      //   unsubscribe();
-      // });
-      return;
-    }
-    // alert(this.state.board);
     const fromCell = board.getCell(from_y, from_x);
     const toCell = board.getCell(to_y, to_x);
     const color = currentPlayer?.color === Colors.WHITE ? "белые" : "черные";
@@ -213,7 +216,7 @@ class App extends Component<{}, AppState> {
 
   swapPlayer = () => {
     const { board, currentPlayer, whitePlayer, blackPlayer } = this.state;
-
+    board.dropHighlightedCells();
     const enemyKing = board.cells.flat().some(cell => 
       cell.figure?.name === FigureNames.KING && cell.figure.color !== currentPlayer?.color
     );
@@ -235,9 +238,11 @@ class App extends Component<{}, AppState> {
       });
       this.restart();
     }
-    this.setState({
+    else {
+      this.setState({
       currentPlayer: currentPlayer?.color === Colors.WHITE ? blackPlayer : whitePlayer,
-    });
+      });
+    }
   };
 
   restart() {
