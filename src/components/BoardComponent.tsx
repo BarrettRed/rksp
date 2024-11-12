@@ -12,102 +12,102 @@ interface BoardProps {
 }
 
 const BoardComponent: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlayer }) => {
-  const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
-  const [selectedKeyCell, setSelectedKeyCell] = useState<Cell | null>(null);
-  const [isSelectingTarget, setIsSelectingTarget] = useState<boolean>(false); // Отслеживание выбора цели
+  const [selectedMouseCell, setSelectedMouseCell] = useState<Cell | null>(null);
+  const [selectedKeyboardCell, setSelectedKeyboardCell] = useState<Cell | null>(null);
+  const [activeKeyboardCell, setActiveKeyboardCell] = useState<Cell | null>(null);
+  const [isMouse, setIsMouse] = useState<boolean>(true);
 
   function click(cell: Cell) {
-    if (selectedCell && selectedCell !== cell && selectedCell.figure?.canMove(cell)) {
-      selectedCell.moveFigure(cell);
+    if (!isMouse) {
+      setIsMouse(true); // Режим мыши
+      setActiveKeyboardCell(null);
+      setSelectedKeyboardCell(null);
+      board.dropHighlightedCells();
+    }
+    
+    if (selectedMouseCell && selectedMouseCell !== cell && selectedMouseCell.figure?.canMove(cell)) {
+      selectedMouseCell.moveFigure(cell);
       swapPlayer();
-      setSelectedCell(null);
-      setIsSelectingTarget(false);
-      board.dropHighlightedCells();  // Ход завершен
-    } else {
-      if (cell.figure?.color === currentPlayer?.color) {
-        setSelectedCell(cell);
-        setIsSelectingTarget(true);  // Фигура выбрана
-      }
+      setSelectedMouseCell(null);
+      board.dropHighlightedCells();
+      updateBoard();
+    } else if (cell.figure?.color === currentPlayer?.color) {
+      setSelectedMouseCell(cell);
+      highlightCells(cell);
     }
   }
 
-  useEffect(() => {
-    if (selectedCell) {
-      highlightCells();
+  function highlightCells(cell: Cell) {
+    board.dropHighlightedCells();
+    if (cell.figure?.color === currentPlayer?.color) {
+      board.highlightCells(cell);
     }
-  }, [selectedCell]);
-
-  function highlightCells() {
-    if (selectedCell?.figure?.color === currentPlayer?.color) {
-      board.highlightCells(selectedCell);
-    }
-    updateBoard(); 
+    updateBoard();
   }
 
   function updateBoard() {
-    const newBoard = board.getCopyBoard(); 
+    const newBoard = board.getCopyBoard();
     setBoard(newBoard);
   }
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!selectedCell && currentPlayer) {
-        // Найдем первую клетку с фигурой текущего игрока, если нет выбранной
-        for (let row of board.cells) {
-          for (let cell of row) {
-            if (cell.figure?.color === currentPlayer.color) {
-              setSelectedCell(cell);
-              return; // Установим только первую найденную клетку
-            }
-          }
-        }
+      if (document.activeElement?.tagName === 'INPUT') return;
+
+      if (isMouse) {
+        setIsMouse(false); // Режим клавиатуры
+        setSelectedMouseCell(null);
+        board.dropHighlightedCells();
       }
-  
-      if (selectedCell) {
-        let newX = selectedCell.x;
-        let newY = selectedCell.y;
-  
+
+      if (!selectedKeyboardCell && currentPlayer) {
+        const firstCellWithFigure = board.cells.flat().find(cell => cell.figure?.color === currentPlayer.color);
+        setSelectedKeyboardCell(firstCellWithFigure || null);
+        return;
+      }
+
+      if (selectedKeyboardCell) {
+        let newX = selectedKeyboardCell.x;
+        let newY = selectedKeyboardCell.y;
+
         switch (event.key) {
           case 'ArrowUp':
-            newY = Math.max(0, selectedCell.y - 1);
+            newY = Math.max(0, selectedKeyboardCell.y - 1);
             break;
           case 'ArrowDown':
-            newY = Math.min(7, selectedCell.y + 1);
+            newY = Math.min(7, selectedKeyboardCell.y + 1);
             break;
           case 'ArrowLeft':
-            newX = Math.max(0, selectedCell.x - 1);
+            newX = Math.max(0, selectedKeyboardCell.x - 1);
             break;
           case 'ArrowRight':
-            newX = Math.min(7, selectedCell.x + 1);
+            newX = Math.min(7, selectedKeyboardCell.x + 1);
             break;
           case 'Enter':
-            if (selectedKeyCell && selectedCell !== selectedKeyCell 
-                                && selectedKeyCell.figure?.canMove(selectedCell)) {
-              selectedKeyCell.moveFigure(selectedCell);
+            if (activeKeyboardCell && activeKeyboardCell.figure?.canMove(selectedKeyboardCell)) {
+              activeKeyboardCell.moveFigure(selectedKeyboardCell);
               swapPlayer();
-              setSelectedCell(null);
-              setSelectedKeyCell(null);
-              setIsSelectingTarget(false);
-              board.dropHighlightedCells();  // Ход завершен
-            } else {
-              if (selectedCell.figure?.color === currentPlayer?.color) {
-                setSelectedKeyCell(selectedCell);
-                setIsSelectingTarget(true);  // Фигура выбрана
-              }
+              setActiveKeyboardCell(null);
+              setSelectedKeyboardCell(null);
+              board.dropHighlightedCells();
+              updateBoard();
+            } else if (selectedKeyboardCell.figure?.color === currentPlayer?.color) {
+              setActiveKeyboardCell(selectedKeyboardCell);
+              highlightCells(selectedKeyboardCell);
             }
-            break;
+            return;
           default:
             return;
         }
 
         const newCell = board.getCell(newX, newY);
-        setSelectedCell(newCell);
+        setSelectedKeyboardCell(newCell);
       }
     };
-  
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedCell, board, currentPlayer, isSelectingTarget]);
+  }, [selectedKeyboardCell, activeKeyboardCell, board, currentPlayer]);
 
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
   const numbers = ['1', '2', '3', '4', '5', '6', '7', '8'];
@@ -122,7 +122,11 @@ const BoardComponent: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPl
                 click={click}
                 cell={cell}
                 key={cell.id}
-                selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}
+                selected={
+                  isMouse
+                    ? cell.x === selectedMouseCell?.x && cell.y === selectedMouseCell?.y
+                    : cell.x === selectedKeyboardCell?.x && cell.y === selectedKeyboardCell?.y
+                }
               />
             )}
           </React.Fragment>
@@ -140,6 +144,6 @@ const BoardComponent: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPl
       </div>
     </div>
   );
-}
+};
 
 export default BoardComponent;
