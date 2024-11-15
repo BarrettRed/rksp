@@ -59,6 +59,7 @@ const BoardComponent: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPl
         setSelectedMouseCell(null);
         board.dropHighlightedCells();
       }
+      
 
       if (!selectedKeyboardCell && currentPlayer) {
         const firstCellWithFigure = board.cells.flat().find(cell => cell.figure?.color === currentPlayer.color);

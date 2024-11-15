@@ -121,9 +121,11 @@ class App extends Component<{}, AppState> {
              .replaceAll("эф", "F")
              .replaceAll("эй", "A")
              .replaceAll("би", "B")
+             .replaceAll("б", "B")
              .replaceAll("se", "C")
+             .replaceAll("цэ", "C")
+             .replaceAll("ц", "C")
              .replaceAll("си", "C")
-             .replaceAll("эф", "F")
              .replaceAll("ф", "F")
              .replaceAll("джи", "G")
              .replaceAll("j", "G")
@@ -131,7 +133,10 @@ class App extends Component<{}, AppState> {
              .replaceAll("д", "D")
              .replaceAll("die", "D")
              .replaceAll("de", "D")
+             .replaceAll("the", "D")
              .replaceAll("и", "E")
+             .replaceAll("аш", "H")
+             .replaceAll("г", "G")
              .replaceAll("а", "A")
              .replaceAll("е", "E");
 
