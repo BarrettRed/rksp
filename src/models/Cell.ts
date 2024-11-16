@@ -89,6 +89,14 @@ export class Cell {
   moveFigure(target: Cell) {
     // Проверяем возможность хода
     if (this.figure?.canMove(target)) {
+      // Рокировка
+      if (this.figure.name === FigureNames.KING && Math.abs(this.x - target.x) === 2) {
+        let rookCellX = this.x - target.x > 0 ? 0 : 7;
+        let rookNewCellX = this.x - target.x > 0 ? 3 : 5;
+        let rookCell = this.board.getCell(rookCellX, this.y);
+        let rookNewCell = this.board.getCell(rookNewCellX, this.y);
+        rookCell.moveFigure(rookNewCell);
+      }
       this.figure.moveFigure(target);
       target.setFigure(this.figure);
       this.figure = null;

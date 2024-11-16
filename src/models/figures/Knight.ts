@@ -11,6 +11,10 @@ export class Knight extends Figure {
     this.name = FigureNames.KNIGHT;
   }
 
+  getCopyFigure(cell: Cell): Figure {
+    return new Knight(this.color, cell);
+  }
+
   canMove(target: Cell): boolean {
     if (!super.canMove(target)) {
       return false;

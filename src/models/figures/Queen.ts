@@ -10,6 +10,10 @@ export class Queen extends Figure {
     this.name = FigureNames.QUEEN;
   }
 
+  getCopyFigure(cell: Cell): Figure {
+    return new Queen(this.color, cell);
+  }
+
   canMove(target: Cell): boolean {
     if (!super.canMove(target)) {
       return false;

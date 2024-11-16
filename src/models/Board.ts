@@ -1,6 +1,7 @@
 import { Cell } from "./Cell";
 import { Colors } from "./Colors";
 import { Bishop } from "./figures/Bishop";
+import { FigureNames } from "./figures/Figure";
 import { King } from "./figures/King";
 import { Knight } from "./figures/Knight";
 import { Pawn } from "./figures/Pawn";
@@ -44,21 +45,40 @@ export class Board {
     }
   }
 
-  public isCellUnderAttack(selectedCell: Cell, target: Cell) {
+  public isCellUnderAttack(target: Cell) {
     for (let i = 0; i < this.cells.length; i++) {
       const row = this.cells[i];
       for (let j = 0; j < row.length; j++) {
         const cell = row[j];
-        if (cell.figure && cell.figure.color !== selectedCell.figure?.color && cell.figure.canMove(target)) 
-          return true;
+        if (cell.figure?.color !== target.figure?.color) {
+          if (cell.figure?.name === FigureNames.KING) {
+            const dx = Math.abs(cell.x - target.x);
+            const dy = Math.abs(cell.y - target.y);
+            if (dx <= 1 && dy <= 1) return true;
+          }
+          if (cell.figure?.canMove(target)) return true;
+        }
       }
     }
     return false;
   }
-
-  public getCopyBoard() : Board {
+  public getCopyBoard(): Board {
     const newBoard = new Board();
     newBoard.cells = this.cells;
+    return newBoard;
+  }
+
+  public getRealCopyBoard(): Board {
+    const newBoard = new Board();
+    newBoard.initCells();
+    for (let i = 0; i < this.cells.length; i++) {
+      const row = this.cells[i];
+      for (let j = 0; j < row.length; j++) {
+        const cell = row[j];
+        if (cell.figure)
+          newBoard.cells[i][j].figure = cell.figure.getCopyFigure(newBoard.cells[i][j]); 
+      }
+    }
     return newBoard;
   }
 
@@ -103,7 +123,7 @@ export class Board {
     new Queen(Colors.BLACK, this.getCell(3, 0));
     new Queen(Colors.WHITE, this.getCell(3, 7));
   }
-   
+
   public addFigures() {
     this.addBishops();
     this.addKings();

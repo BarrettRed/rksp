@@ -12,7 +12,7 @@ export enum FigureNames {
   BISHOP="Слон"
 }
 
-export class Figure {
+export abstract class Figure {
   color: Colors;
   logo: typeof logo | null;
   cell: Cell;
@@ -29,6 +29,8 @@ export class Figure {
     this.isFirstMove = true;
     this.id = Math.random();
   }
+
+  abstract getCopyFigure(cell: Cell) : Figure;
 
   canMove(target: Cell) : boolean {
     if (target.figure?.color === this.color) {

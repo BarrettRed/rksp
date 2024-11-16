@@ -11,6 +11,10 @@ export class Bishop extends Figure {
     this.name = FigureNames.BISHOP;
   }
 
+  getCopyFigure(cell: Cell): Figure {
+    return new Bishop(this.color, cell);
+  }
+
   canMove(target: Cell): boolean {
     if (!super.canMove(target)) {
       return false;

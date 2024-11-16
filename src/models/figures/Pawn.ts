@@ -13,6 +13,10 @@ export class Pawn extends Figure {
     this.name = FigureNames.PAWN;
   }
 
+  getCopyFigure(cell: Cell): Figure {
+    return new Pawn(this.color, cell);
+  }
+
   canMove(target: Cell): boolean {
     if (!super.canMove(target)) {
       return false;

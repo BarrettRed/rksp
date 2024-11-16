@@ -10,6 +10,10 @@ export class Rook extends Figure {
     this.name = FigureNames.ROOK;
   }
 
+  getCopyFigure(cell: Cell): Figure {
+    return new Rook(this.color, cell);
+  }
+
   canMove(target: Cell): boolean {
     if (!super.canMove(target)) {
       return false;

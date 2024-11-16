@@ -11,13 +11,38 @@ export class King extends Figure {
     this.name = FigureNames.KING;
   }
 
+  getCopyFigure(cell: Cell): Figure {
+    return new King(this.color, cell);
+  }
+
   canMove(target: Cell): boolean {
     if (!super.canMove(target)) {
       return false;
     }
     
-    const dx = Math.abs(this.cell.x - target.x);
+    const dx = this.cell.x - target.x;
     const dy = Math.abs(this.cell.y - target.y);
-    return dx <= 1 && dy <= 1 && (target.isEmpty() || this.cell.isEnemy(target));
+
+    if (Math.abs(dx) <= 1 && dy <= 1 && (target.isEmpty() || this.cell.isEnemy(target))) {
+      let newBoard = this.cell.board.getRealCopyBoard();
+      let newCell = newBoard.getCell(this.cell.x, this.cell.y);
+      let newTarget = newBoard.getCell(target.x, target.y);
+      if (newCell.figure) {
+      newTarget.setFigure(newCell.figure);
+      newCell.figure = null;
+      }
+      console.log(newBoard);
+      return !newBoard.isCellUnderAttack(newBoard.getCell(newTarget.x, newTarget.y));
+    }
+
+    if (Math.abs(dx) === 2 && dy === 0 && this.isFirstMove) {
+      let rookCellX = dx > 0 ? 0 : 7;
+      let rookCell = target.board.getCell(rookCellX, this.cell.y);
+      return rookCell.figure?.name === FigureNames.ROOK &&
+             rookCell.figure?.isFirstMove &&
+             this.cell.isEmptyHorizontal(rookCell) 
+    }
+
+    return false;
   }
 }
