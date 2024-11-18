@@ -15,8 +15,8 @@ export class King extends Figure {
     return new King(this.color, cell);
   }
 
-  canMove(target: Cell): boolean {
-    if (!super.canMove(target)) {
+  canMove(target: Cell, test: boolean = true): boolean {
+    if (!super.canMove(target, test)) {
       return false;
     }
     
@@ -40,7 +40,7 @@ export class King extends Figure {
       let rookCell = target.board.getCell(rookCellX, this.cell.y);
       return rookCell.figure?.name === FigureNames.ROOK &&
              rookCell.figure?.isFirstMove &&
-             this.cell.isEmptyHorizontal(rookCell) 
+             this.cell.isEmptyHorizontal(rookCell)
     }
 
     return false;

@@ -44,6 +44,76 @@ export class Board {
       }
     }
   }
+  public FindKing(color: Colors): Cell {
+    for (let i = 0; i < this.cells.length; i++) {
+      const row = this.cells[i];
+      for (let j = 0; j < row.length; j++) {
+        const cell = row[j];
+        const figure = cell.figure;
+        if (figure)
+          if (figure.color === color && figure.name === FigureNames.KING)
+            return cell;
+      }
+    }
+    return this.cells[0][0];
+  }
+
+  public isCheck(color: Colors) {
+    this.cells.forEach((row) => row.forEach((cell) => cell.kingCheck = false))
+    const kingCell = this.FindKing(color);
+    kingCell.kingCheck = this.isCellUnderAttack(kingCell);
+    return kingCell.kingCheck;
+  }
+
+  public isCheckMate(color: Colors): boolean {
+    if (!this.isCheck(color)) {
+      return false; // Нет шаха — нет мата.
+    }
+  
+    // Проверяем, есть ли хотя бы один ход, спасающий короля.
+    for (let i = 0; i < this.cells.length; i++) {
+      const row = this.cells[i];
+      for (let j = 0; j < row.length; j++) {
+        const cell = row[j];
+        if (cell.figure?.color === color) {
+          // Перебираем все доступные ходы фигуры.
+          const availableMoves = this.getAvailableMovesForFigure(cell);
+          for (const move of availableMoves) {
+            // Симулируем ход на новой доске.
+            const simulatedBoard = this.getRealCopyBoard();
+            const simulatedCell = simulatedBoard.getCell(cell.x, cell.y);
+            const simulatedTarget = simulatedBoard.getCell(move.x, move.y);
+  
+            // Выполняем ход.
+            if (simulatedCell.figure)
+              simulatedTarget.setFigure(simulatedCell.figure);
+            simulatedCell.figure = null;
+  
+            // Проверяем, остался ли король под шахом.
+            if (!simulatedBoard.isCheck(color)) {
+              return false; // Есть хотя бы один ход, который спасает от шаха.
+            }
+          }
+        }
+      }
+    }
+  
+    return true; // Нет доступных ходов, чтобы избежать шаха.
+  }
+  
+  private getAvailableMovesForFigure(cell: Cell): Cell[] {
+    const moves: Cell[] = [];
+    for (let i = 0; i < this.cells.length; i++) {
+      for (let j = 0; j < this.cells[i].length; j++) {
+        const target = this.cells[i][j];
+        if (cell.figure?.canMove(target)) {
+          moves.push(target);
+        }
+      }
+    }
+    return moves;
+  }
+  
 
   public isCellUnderAttack(target: Cell) {
     for (let i = 0; i < this.cells.length; i++) {
@@ -56,7 +126,7 @@ export class Board {
             const dy = Math.abs(cell.y - target.y);
             if (dx <= 1 && dy <= 1) return true;
           }
-          if (cell.figure?.canMove(target)) return true;
+          if (cell.figure?.canMove(target, false)) return true;
         }
       }
     }
@@ -76,7 +146,7 @@ export class Board {
       for (let j = 0; j < row.length; j++) {
         const cell = row[j];
         if (cell.figure)
-          newBoard.cells[i][j].figure = cell.figure.getCopyFigure(newBoard.cells[i][j]); 
+          newBoard.cells[i][j].figure = cell.figure.getCopyFigure(newBoard.cells[i][j]);
       }
     }
     return newBoard;

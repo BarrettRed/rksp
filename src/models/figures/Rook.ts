@@ -14,8 +14,8 @@ export class Rook extends Figure {
     return new Rook(this.color, cell);
   }
 
-  canMove(target: Cell): boolean {
-    if (!super.canMove(target)) {
+  canMove(target: Cell, test: boolean = true): boolean {
+    if (!super.canMove(target, test)) {
       return false;
     }
     if (this.cell.isEmptyVertical(target)) {

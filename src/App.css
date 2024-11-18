@@ -70,6 +70,10 @@ html, body {
   background-color: rgb(114, 153, 72);
 }
 
+.king_check {
+  background-color: rgb(194, 15, 15);
+}
+
 .available {
   width: 1.75vh;
   height: 1.75vh;

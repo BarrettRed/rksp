@@ -15,8 +15,8 @@ export class Knight extends Figure {
     return new Knight(this.color, cell);
   }
 
-  canMove(target: Cell): boolean {
-    if (!super.canMove(target)) {
+  canMove(target: Cell, test: boolean = true): boolean {
+    if (!super.canMove(target, test)) {
       return false;
     }
     

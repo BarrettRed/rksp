@@ -9,6 +9,7 @@ export class Cell {
   figure: Figure | null;
   board: Board;
   available: boolean;
+  kingCheck: boolean;
   id: number;
   
   constructor(board: Board, x: number, y: number, color: Colors, figure: Figure | null) {
@@ -19,6 +20,7 @@ export class Cell {
     this.board = board;
     this.available = false;
     this.id = Math.random();
+    this.kingCheck = false;
   }
 
   isEmpty(): boolean {
@@ -88,6 +90,7 @@ export class Cell {
 
   moveFigure(target: Cell) {
     // Проверяем возможность хода
+    const color = this.figure?.color;
     if (this.figure?.canMove(target)) {
       // Рокировка
       if (this.figure.name === FigureNames.KING && Math.abs(this.x - target.x) === 2) {
@@ -101,7 +104,7 @@ export class Cell {
       target.setFigure(this.figure);
       this.figure = null;
     }
-  }
-  
-  
+    if (color)
+      this.board.isCheck(color === Colors.BLACK ? Colors.WHITE : Colors.BLACK);
+  }  
 }

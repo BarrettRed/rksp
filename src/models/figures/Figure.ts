@@ -32,9 +32,25 @@ export abstract class Figure {
 
   abstract getCopyFigure(cell: Cell) : Figure;
 
-  canMove(target: Cell) : boolean {
+  canMove(target: Cell, test: boolean = true) : boolean {
     if (target.figure?.color === this.color) {
       return false;
+    }
+    if (test && this.cell.board.isCheck(this.color)) {
+      // Симулируем ход на новой доске.
+      const simulatedBoard = this.cell.board.getRealCopyBoard();
+      const simulatedCell = simulatedBoard.getCell(this.cell.x, this.cell.y);
+      const simulatedTarget = simulatedBoard.getCell(target.x, target.y);
+
+      // Выполняем ход.
+      if (simulatedCell.figure)
+        simulatedTarget.setFigure(simulatedCell.figure);
+      simulatedCell.figure = null;
+
+      // Проверяем, остался ли король под шахом.
+      if (simulatedBoard.isCheck(this.color)) {
+        return false; // Есть хотя бы один ход, который спасает от шаха.
+      }
     }
     return true;
   }

@@ -7,15 +7,15 @@ interface CellProps {
   click: (cell: Cell) => void;
 }
 
-const CellComponent: FC<CellProps> = ({cell, selected, click}) => {
+const CellComponent: FC<CellProps> = ({ cell, selected, click }) => {
   return (
-    <div 
-      className={['cell', cell.color, selected ? "selected" : ""].join(' ')}
+    <div
+      className={['cell', cell.color, selected ? "selected" : "", cell.kingCheck ? "king_check" : ""].join(' ')}
       onClick={() => click(cell)}
       tabIndex={-1}
     >
-      {cell.available && <div className="available"/>}
-      {cell.figure?.logo && <img src={cell.figure.logo} alt=""/>}    
+      {cell.available && <div className="available" />}
+      {cell.figure?.logo && <img src={cell.figure.logo} alt="" />}
     </div>
   );
 }
