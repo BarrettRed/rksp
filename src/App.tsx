@@ -5,7 +5,8 @@ import { Board } from './models/Board';
 import { Player } from './models/Player';
 import { Colors } from './models/Colors';
 import { createAssistant, createSmartappDebugger } from '@salutejs/client';
-import { FigureNames } from './models/figures/Figure';
+import blackLogo from "./assets/king_black.svg"
+import whiteLogo from "./assets/king_white.svg"
 
 const initializeAssistant = (getState: any) => {
   if (process.env.NODE_ENV === 'development') {
@@ -184,7 +185,7 @@ class App extends Component<{}, AppState> {
     board.dropHighlightedCells();
     this.isGameOver();
     this.setState((state) => {
-      return {currentPlayer: state.currentPlayer?.color === Colors.WHITE ? blackPlayer : whitePlayer}
+      return { currentPlayer: state.currentPlayer?.color === Colors.WHITE ? blackPlayer : whitePlayer }
     });
   };
 
@@ -194,9 +195,9 @@ class App extends Component<{}, AppState> {
       const winnerColor = this.state.currentPlayer.color === Colors.WHITE ? "Белые" : "Черные";
       console.log(`${winnerColor} побеждают!`);
       this.sendData("game_over", `Шах и мат! ${winnerColor} побеждают!`);
-      this.restart(); 
+      this.restart();
     }
-  } 
+  }
   sendData(action: string, val: string) {
     const data = {
       action: {
@@ -210,7 +211,7 @@ class App extends Component<{}, AppState> {
       unsubscribe();
     });
   }
- 
+
   restart() {
     const newBoard = new Board();
     newBoard.initCells();
@@ -232,9 +233,20 @@ class App extends Component<{}, AppState> {
           currentPlayer={currentPlayer}
           swapPlayer={this.swapPlayer}
         />
+        <div className="current-player">
+          Ход:
+          <div
+            className={['cell', currentPlayer?.color === Colors.WHITE ? 'black' : 'white'].join(' ')}
+            tabIndex={-1}
+          >
+            <img src={currentPlayer?.color === Colors.WHITE ? whiteLogo : blackLogo} alt="" />
+          </div>
+        </div>
       </div>
     );
   }
 }
 
 export default App;
+
+

@@ -16,6 +16,31 @@ html, body {
   justify-content: center;
 }
 
+.current-player {
+  height: calc(min(90vw, 90vh - 130px) * 0.95 / 8);
+  width: calc(min(90vw, 90vh - 130px) * 0.95 / 8);
+  position: absolute;
+  color: white;
+  font-size: calc( (100vw - 480px)/(1280 - 480) * (24 - 16) + 22px);
+  font-weight: bold;
+}
+
+@media all and (orientation:landscape) {
+  /* Для широких экранов */
+  .current-player {
+    right: calc((100vw - min(90vw, 90vh - 130px)) / 5);
+    top: calc((100vh - calc(min(90vw, 90vh - 130px) * 0.95 / 8)) / 2);
+  }
+}
+
+@media all and (orientation:portrait) {
+  /* Для узких экранов */
+  .current-player {
+    right: auto;
+    top: calc((100vh - min(90vw, 90vh - 130px) - 130px) / 5);
+  }
+}
+
 .board-wrapper {
   display: grid;
   grid-template-columns: 95% 5%;
