@@ -101,6 +101,36 @@ export class Board {
     return true; // Нет доступных ходов, чтобы избежать шаха.
   }
   
+  public isPat(color: Colors) {
+    let moves: Cell[] = [];
+    const king_cell = this.FindKing(color);
+    
+    moves = this.getAvailableMovesForFigure(king_cell);
+    if (moves.length > 0) {
+      console.log("нет ходов у короля")
+      return false;
+    }
+      
+    if (this.isCheck(color)) {
+      console.log("король под шахом")
+      return false;
+    }
+
+    for (let i = 0; i < this.cells.length; i++) {
+      for (let j = 0; j < this.cells[i].length; j++) {
+        const cell = this.cells[i][j];
+        if (cell.figure?.color === color) {
+          moves = this.getAvailableMovesForFigure(cell);
+          if (moves.length > 0) {
+            console.log("есть ходы у фигуры", cell)
+            return false;
+          }
+        }
+      }
+    } 
+    return true;
+  }
+
   private getAvailableMovesForFigure(cell: Cell): Cell[] {
     const moves: Cell[] = [];
     for (let i = 0; i < this.cells.length; i++) {
@@ -201,6 +231,9 @@ export class Board {
     this.addPawns();
     this.addQueens();
     this.addRooks();
+    // new Queen(Colors.WHITE, this.getCell(2, 2));
+    // new King(Colors.BLACK, this.getCell(3, 0));
+    // new King(Colors.WHITE, this.getCell(5, 3));
   }
 
 }

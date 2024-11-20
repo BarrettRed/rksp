@@ -197,6 +197,9 @@ class App extends Component<{}, AppState> {
       this.sendData("game_over", `Шах и мат! ${winnerColor} побеждают!`);
       this.restart();
     }
+    if (this.state.currentPlayer && this.state.board.isPat(color)) {
+      this.sendData("game_over", `Пат! Матч окончен в ничью.`);
+    }
   }
   sendData(action: string, val: string) {
     const data = {
