@@ -115,6 +115,16 @@ const BoardComponent: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPl
 
   return (
     <div className="board-wrapper">
+       <div className="numbers left">
+        {numbers.map((number, index) => (
+          <div key={index} className="number">{number}</div>
+        ))}
+      </div>
+      <div className="letters top">
+        {letters.map((letter, index) => (
+          <div key={index} className="letter">{letter}</div>
+        ))}
+      </div>
       <div className="board">
         {board.cells.map((row: Cell[], rowIndex: number) => 
           <React.Fragment key={rowIndex}>
@@ -133,12 +143,12 @@ const BoardComponent: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPl
           </React.Fragment>
         )}
       </div>
-      <div className="numbers">
+      <div className="numbers right">
         {numbers.map((number, index) => (
           <div key={index} className="number">{number}</div>
         ))}
       </div>
-      <div className="letters">
+      <div className="letters bottom">
         {letters.map((letter, index) => (
           <div key={index} className="letter">{letter}</div>
         ))}

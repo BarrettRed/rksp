@@ -40,7 +40,7 @@ export class King extends Figure {
       let rookCell = target.board.getCell(rookCellX, this.cell.y);
       return rookCell.figure?.name === FigureNames.ROOK &&
              rookCell.figure?.isFirstMove &&
-             this.cell.isEmptyHorizontal(rookCell)
+             this.cell.isEmptyHorizontal(rookCell) && !this.cell.board.isCheck(this.color);
     }
 
     return false;
